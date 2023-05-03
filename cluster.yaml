@@ -2,7 +2,7 @@ apiVersion: eksctl.io/v1alpha5
 kind: ClusterConfig
 metadata:
   name: EKS-Demo-Cluster
-  region: ap-southeast-1
+  region: us-east-1
 
 vpc:
   id: vpc-0abc85ded381a0dc9
