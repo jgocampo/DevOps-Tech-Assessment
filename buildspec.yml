@@ -4,11 +4,8 @@ phases:
   pre_build:
     commands:
       - apt-get update && apt-get install -y awscli docker.io
-      - $(which docker) info
-      - $(which docker) version
-      - sudo service docker start
       - echo Logging in to Amazon ECR...
-      - $(aws ecr get-login --no-include-email --region us-east-1 | sed 's|https://||')
+      - $(aws ecr get-login --no-include-email --region us-east-1)
       - REPOSITORY_URI=803387083822.dkr.ecr.us-east-1.amazonaws.com/devops-assessment
       - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
   build:
@@ -26,4 +23,4 @@ phases:
       - echo Updating the Kubernetes deployment...
       - kubectl set image deployment/devops-challenge back-end=803387083822.dkr.ecr.us-east-1.amazonaws.com/devops-assessment:$IMAGE_TAG
       - echo Deployment completed on `date`
-      - service docker stop
+     
