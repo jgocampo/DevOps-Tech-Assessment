@@ -1,14 +1,11 @@
 version: 0.2
 
 phases:
-  install:
-    runtime-versions:
-      docker: 19
   pre_build:
     commands:
-      - apt-get update && apt-get install -y awscli
+      - apt-get update && apt-get install -y awscli docker.io
       - echo Logging in to Amazon ECR...
-      - $(aws ecr get-login --no-include-email --region us-east-1)
+      - $(aws ecr get-login --no-include-email --region us-east-1 | sed 's|https://||')
       - REPOSITORY_URI=803387083822.dkr.ecr.us-east-1.amazonaws.com/devops-assessment
       - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
   build:
