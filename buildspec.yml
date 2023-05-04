@@ -4,6 +4,9 @@ phases:
   pre_build:
     commands:
       - apt-get update && apt-get install -y awscli docker.io
+      - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+      - chmod +x kubectl
+      - mv kubectl /usr/local/bin/
       - service docker start
       - echo Logging in to Amazon ECR...
       - $(aws ecr get-login --no-include-email --region us-east-1)
@@ -25,4 +28,3 @@ phases:
       - kubectl set image deployment/devops-challenge back-end=803387083822.dkr.ecr.us-east-1.amazonaws.com/devops-assessment:$IMAGE_TAG
       - echo Deployment completed on `date`
       - service docker stop
-     
