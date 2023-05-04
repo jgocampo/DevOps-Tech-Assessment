@@ -6,6 +6,7 @@ phases:
       docker: 19
   pre_build:
     commands:
+      - apt-get update && apt-get install -y awscli
       - echo Logging in to Amazon ECR...
       - $(aws ecr get-login --no-include-email --region us-east-1)
       - REPOSITORY_URI=803387083822.dkr.ecr.us-east-1.amazonaws.com/devops-assessment
