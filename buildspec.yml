@@ -15,14 +15,14 @@ phases:
     commands:
       - echo Build started on `date`
       - echo Building the Docker image...
-      - docker build -t $REPOSITORY_URI:$IMAGE_TAG .
-      - docker tag $REPOSITORY_URI:$IMAGE_TAG $REPOSITORY_URI:latest
+      - docker build -t 803387083822.dkr.ecr.us-east-1.amazonaws.com/devops-assessment:$IMAGE_TAG .
+      - docker tag 803387083822.dkr.ecr.us-east-1.amazonaws.com/devops-assessment:$IMAGE_TAG 803387083822.dkr.ecr.us-east-1.amazonaws.com/devops-assessment:latest
   post_build:
     commands:
       - echo Build completed on `date`
       - echo Pushing the Docker image...
-      - docker push $REPOSITORY_URI:$IMAGE_TAG
-      - docker push $REPOSITORY_URI:latest
+      - docker push 803387083822.dkr.ecr.us-east-1.amazonaws.com/devops-assessment:$IMAGE_TAG
+      - docker push 803387083822.dkr.ecr.us-east-1.amazonaws.com/devops-assessment:latest
       - echo Updating the Kubernetes deployment...
-      - kubectl set image deployment/devops-challenge back-end=$REPOSITORY_URI:$IMAGE_TAG
+      - kubectl set image deployment/devops-challenge back-end=803387083822.dkr.ecr.us-east-1.amazonaws.com/devops-assessment:$IMAGE_TAG
       - echo Deployment completed on `date`
