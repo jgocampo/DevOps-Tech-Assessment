@@ -24,6 +24,9 @@ phases:
       - echo Pushing the Docker image...
       - docker push 803387083822.dkr.ecr.us-east-1.amazonaws.com/devops-assessment:$IMAGE_TAG
       - docker push 803387083822.dkr.ecr.us-east-1.amazonaws.com/devops-assessment:latest
+      - echo Configuring the Kubernetes context...
+      - aws eks --region us-east-1 update-kubeconfig --name EKS-Demo-Cluster
+      - kubectl config use-context EKS-Demo-Cluster
       - echo Updating the Kubernetes deployment...
       - kubectl set image deployment/devops-challenge back-end=803387083822.dkr.ecr.us-east-1.amazonaws.com/devops-assessment:$IMAGE_TAG
       - echo Deployment completed on `date`
