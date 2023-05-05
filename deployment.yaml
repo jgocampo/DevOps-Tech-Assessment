@@ -16,5 +16,6 @@ spec:
       containers:
         - name: back-end
           image: 803387083822.dkr.ecr.us-east-1.amazonaws.com/devops-assessment:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 5000
