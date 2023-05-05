@@ -1,34 +1,31 @@
+---
 version: 0.2
-
 phases:
-  pre_build:
+  install:
     commands:
-      - apt-get update && apt-get install -y awscli docker.io curl
+      - echo Logging in to Amazon ECR...
+      - $(aws ecr get-login --no-include-email --region $AWS_REGION)
       - curl -sS -o aws-iam-authenticator https://amazon-eks.s3.us-west-2.amazonaws.com/1.19.6/2021-01-05/bin/linux/amd64/aws-iam-authenticator
       - curl -sS -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.20.4/2021-04-12/bin/linux/amd64/kubectl
       - chmod +x ./kubectl ./aws-iam-authenticator
       - export PATH=$PWD/:$PATH
-      - service docker start
-      - echo Logging in to Amazon ECR...
-      - $(aws ecr get-login --no-include-email --region us-east-1)
-      - REPOSITORY_URI=803387083822.dkr.ecr.us-east-1.amazonaws.com/devops-assessment
-      - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+  pre_build:
+      commands:
+        - TAG="$(date +%Y-%m-%d.%H.%M.%S).$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | head -c 8)"
+        - sed -i 's@CONTAINER_IMAGE@'"$REPOSITORY:$TAG"'@' Kubernetes/eks-deployment.yml
+        - $(aws ecr get-login --no-include-email)
+        - export KUBECONFIG=$HOME/.kube/config
   build:
     commands:
-      - echo Build started on `date`
-      - echo Building the Docker image...
-      - docker build -t 803387083822.dkr.ecr.us-east-1.amazonaws.com/devops-assessment:$IMAGE_TAG .
-      - docker tag 803387083822.dkr.ecr.us-east-1.amazonaws.com/devops-assessment:$IMAGE_TAG 803387083822.dkr.ecr.us-east-1.amazonaws.com/devops-assessment:latest
+      - docker build --tag $REPOSITORY:$TAG .
+
   post_build:
     commands:
-      - echo Build completed on `date`
-      - echo Pushing the Docker image...
-      - docker push 803387083822.dkr.ecr.us-east-1.amazonaws.com/devops-assessment:$IMAGE_TAG
-      - docker push 803387083822.dkr.ecr.us-east-1.amazonaws.com/devops-assessment:latest
-      - echo Configuring the Kubernetes context...
-      - aws eks --region us-east-1 update-kubeconfig --name EKS-Demo-Cluster
-      - kubectl config use-context EKS-Demo-Cluster
-      - echo Updating the Kubernetes deployment...
-      - kubectl set image deployment/devops-challenge back-end=803387083822.dkr.ecr.us-east-1.amazonaws.com/devops-assessment:$IMAGE_TAG
-      - echo Deployment completed on `date`
-      - service docker stop
+      - docker push $REPOSITORY:$TAG
+      - CREDENTIALS=$(aws sts assume-role --role-arn $EKS_KUBECTL_ROLE_ARN --role-session-name codebuild-kubectl --duration-seconds 900)
+      - export AWS_ACCESS_KEY_ID="$(echo ${CREDENTIALS} | jq -r '.Credentials.AccessKeyId')"
+      - export AWS_SECRET_ACCESS_KEY="$(echo ${CREDENTIALS} | jq -r '.Credentials.SecretAccessKey')"
+      - export AWS_SESSION_TOKEN="$(echo ${CREDENTIALS} | jq -r '.Credentials.SessionToken')"
+      - export AWS_EXPIRATION=$(echo ${CREDENTIALS} | jq -r '.Credentials.Expiration')
+      - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME
+      - kubectl apply -f Kubernetes/eks-deployment.yml 
