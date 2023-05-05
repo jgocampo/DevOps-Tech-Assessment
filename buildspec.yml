@@ -26,6 +26,7 @@ phases:
       - docker push $REPOSITORY:$TAG
       - aws eks --region $AWS_REGION update-kubeconfig --name $EKS_CLUSTER_NAME --kubeconfig /tmp/kubeconfig
       - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME
+      - kubectl config view --kubeconfig=$HOME/.kube/config
       - kubectl apply -f deployment.yaml --kubeconfig $HOME/.kube/config
       - service docker stop
       - echo All done!
