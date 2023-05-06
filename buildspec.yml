@@ -20,7 +20,7 @@ phases:
   build:
     commands:
       - docker build --tag $REPOSITORY:$TAG .
-      - docker tag $REPOSITORY:$IMAGE_TAG $REPOSITORY:latest
+      - docker tag $REPOSITORY:$TAG $REPOSITORY:latest
 
   post_build:
     commands:
