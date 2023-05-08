@@ -1,5 +1,5 @@
 # Imagen base
-FROM python:3.9-slim-buster
+FROM public.ecr.aws/g7r9o2q3/python-3.9-slim-buster:latest
 
 # Establece el directorio de trabajo en la imagen
 WORKDIR /app
